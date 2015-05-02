@@ -78,11 +78,11 @@ namespace TaskWatcher.Console
                 switch (command.Type)
                 {
                     case CommandType.Task:
-                        PrintTasks();
+                        ListNotDoneTasks();
                         break;
 
                     case CommandType.Repository:
-                        PrintRepositories();
+                        ListRepositories();
                         break;
                 }
                 return true;
@@ -95,7 +95,7 @@ namespace TaskWatcher.Console
             }
         }
 
-        [Command(CommandType.Usage, "help", Help = "Prints command usage or list of all commands")]
+        [Command(CommandType.CmdProcessor, "help", Help = "Prints command usage or list of all commands")]
         public void CmdHelp(string cmd = null)
         {
             if (!String.IsNullOrEmpty(cmd))
@@ -111,11 +111,37 @@ namespace TaskWatcher.Console
             PrintUsage();
         }
 
-        private void PrintTasks()
+        [Command(CommandType.CmdProcessor, "list", Help = "Lists a task, or all not done tasks")]
+        public void ListNotDoneTasks(int taskIndex = 0)
+        {
+            if (taskIndex > 0)
+            {
+                TaskItem taskItem = _taskManager.GetByIndex(taskIndex);
+                PrintTasks(new[] { taskItem }, e => e);
+            }
+            else
+            {
+                PrintTasks(_taskManager.Tasks, e => e.ExcludeByTag(TaskTag.Done));
+            }
+        }
+
+        [Command(CommandType.CmdProcessor, "listall", Help = "Lists all tasks")]
+        public void ListAllTasks()
+        {
+            PrintTasks(_taskManager.Tasks, e => e);
+        }
+
+        [Command(CommandType.CmdProcessor, "repos", Help = "Lists available repositories")]
+        public void ListRepositories()
+        {
+            PrintRepositories();
+        }
+
+        private void PrintTasks(IEnumerable<TaskItem> tasks, Func<IEnumerable<TaskItem>, IEnumerable<TaskItem>> filter)
         {
             _output.WriteLine("'{0}' repository", _taskManager.RepositoryName);
             var printer = new TaskPrinter(_output, _ident);
-            printer.PrintAllByPriority(_taskManager.Tasks, e => e.ExcludeByTag(TaskTag.Done));
+            printer.PrintAllByPriority(tasks, filter);
         }
 
         private void PrintRepositories()
@@ -131,7 +157,7 @@ namespace TaskWatcher.Console
         private void PrintCommandUsage(Command command)
         {
             _output.WriteLine("{0} - {1}", command.Name, command.Help);
-            _output.WriteLine("{0}Usage: tw <{1}> {2}", _ident, command.Name, command.UsageArgs);
+            _output.WriteLine("{0}Usage: <tw> {1} {2}", _ident, command.Name, command.UsageArgs);
         }
 
         public void PrintUsage()

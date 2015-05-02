@@ -6,7 +6,7 @@ namespace TaskWatcher.Console
     {
         Repository,
         Task,
-        Usage,
+        CmdProcessor,
         //Queue,
     }
 

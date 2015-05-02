@@ -16,11 +16,6 @@ namespace TaskWatcher.Console
             _manager = manager;
         }
 
-        [Command(CommandType.Repository, "repos", Help = "Lists available repositories")]
-        public void ListRepositories()
-        {
-        }
-
         [Command(CommandType.Repository, "repoadd", Help = "Creates new repository")]
         public void CreateRepository(string repoName, string repoPath = null)
         {

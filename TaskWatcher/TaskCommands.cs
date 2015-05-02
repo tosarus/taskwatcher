@@ -11,11 +11,6 @@ namespace TaskWatcher.Console
             _manager = manager;
         }
 
-        [Command(CommandType.Task, "list", Help = "Lists all tasks")]
-        public void ListTasks()
-        {
-        }
-
         [Command(CommandType.Task, "add", Help = "Creates task with specified or default priority")]
         public void CreateTask(string name, int priority = TaskPriority.Default)
         {
@@ -68,7 +63,11 @@ namespace TaskWatcher.Console
         [Command(CommandType.Task, "done", Help = "Marks task as done")]
         public void AddDoneTagToTask(int taskIndex)
         {
-            _manager.AddTag(taskIndex, TaskTag.Done);
+            TaskItem item = _manager.AddTag(taskIndex, TaskTag.Done);
+            foreach (TaskItem subTask in item.SubTasks)
+            {
+                AddDoneTagToTask(subTask.Index);
+            }
         }
 
         [Command(CommandType.Task, "undone", Help = "Removes done mark from task")]
