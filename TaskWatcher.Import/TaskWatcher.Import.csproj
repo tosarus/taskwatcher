@@ -38,10 +38,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ImporterFactory.cs" />
+    <Compile Include="ImporterImpl.cs" />
     <Compile Include="OldInfra\OldInfraImporter.cs" />
     <Compile Include="OldInfra\SubTask.cs" />
     <Compile Include="OldInfra\Task.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Ver1\Task.cs" />
+    <Compile Include="Ver1\Ver1Importer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

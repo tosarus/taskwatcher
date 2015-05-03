@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 
 using TaskWatcher.Common;
+using TaskWatcher.Import;
 
 namespace TaskWatcher.Console
 {
@@ -135,6 +136,21 @@ namespace TaskWatcher.Console
         public void ListRepositories()
         {
             PrintRepositories();
+        }
+
+        [Command(CommandType.Repository, "repoconv1", Help = "Converts v1 repository")]
+        public void ConvertVer1Repository(string repoName)
+        {
+            Repository repository = _repoManager.GetRepository(repoName);
+            TaskManager taskManager = _taskManager.RepositoryName == repoName
+                                          ? _taskManager
+                                          : new TaskManager(Enumerable.Empty<TaskItem>(), repository.Name);
+
+            var importerFactory = new ImporterFactory();
+            IImporter importer = importerFactory.CreateVer1Importer();
+            importer.ImportFromFileToTaskManager(repository.Path, taskManager);
+
+            TaskStore.SaveTaskManager(repository, taskManager);
         }
 
         private void PrintTasks(IEnumerable<TaskItem> tasks, Func<IEnumerable<TaskItem>, IEnumerable<TaskItem>> filter)

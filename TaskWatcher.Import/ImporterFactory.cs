@@ -1,10 +1,7 @@
-﻿using System.Collections.Generic;
-
-namespace TaskWatcher.Import
+﻿namespace TaskWatcher.Import
 {
     public interface IImporter
     {
-        ICollection<Common.TaskItem> ImportFromFile(string fileName);
         void ImportFromFileToTaskManager(string fileName, Common.TaskManager taskManager);
     }
 
@@ -13,6 +10,11 @@ namespace TaskWatcher.Import
         public IImporter CreateOldInfraImporter()
         {
             return new OldInfra.OldInfraImporter();
+        }
+
+        public IImporter CreateVer1Importer()
+        {
+            return new Ver1.Ver1Importer();
         }
     }
 }

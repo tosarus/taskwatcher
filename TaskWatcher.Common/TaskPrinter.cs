@@ -42,7 +42,7 @@ namespace TaskWatcher.Common
 
         private static string ToString(TaskItem task)
         {
-            bool isDone = task.Tags.Contains(TaskTag.Done);
+            bool isDone = task.Tags.ContainsKey(TaskTag.Done);
             return String.Format("<{0}>{1}{2,2} {3}", task.Priority, isDone ? "+" : " ", task.Index, task.Name);
         }
     }

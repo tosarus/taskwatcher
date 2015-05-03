@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 using Newtonsoft.Json;
 
@@ -17,14 +16,21 @@ namespace TaskWatcher.Common
                 return null;
             }
 
-            string str = File.ReadAllText(fileName);
-            return Deserialize<T>(str);
+            try
+            {
+                string str = File.ReadAllText(fileName);
+                return Deserialize<T>(str);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public static void SaveToFile(string fileName, object obj)
         {
             string rootDirectory = Path.GetDirectoryName(fileName);
-            if (!Directory.Exists(rootDirectory))
+            if (!String.IsNullOrEmpty(rootDirectory) && !Directory.Exists(rootDirectory))
             {
                 Directory.CreateDirectory(rootDirectory);
             }
@@ -35,7 +41,7 @@ namespace TaskWatcher.Common
 
         public static string Serialize(object obj)
         {
-            return JsonConvert.SerializeObject(obj);
+            return JsonConvert.SerializeObject(obj, Formatting.Indented);
         }
 
         public static T Deserialize<T>(string str)

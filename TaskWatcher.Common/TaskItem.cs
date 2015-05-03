@@ -22,7 +22,7 @@ namespace TaskWatcher.Common
         public string Name { get; set; }
         public DateTime Created { get; set; }
         public DateTime LastEdited { get; set; }
-        public HashSet<string> Tags { get; set; }
+        public Dictionary<string, DateTime> Tags { get; set; }
         public List<TaskItem> SubTasks { get; set; }
     }
 }

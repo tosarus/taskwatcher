@@ -62,7 +62,7 @@ namespace TaskWatcher.Console
             ParameterInfo[] parameterInfos = method.GetParameters();
             if (args.Length > parameterInfos.Length)
             {
-                string message = String.Format("To many arguments provided({0}, expected {1}",
+                string message = String.Format("To many arguments (provided {0} instead of {1})",
                                                args.Length, parameterInfos.Length);
                 throw new ArgumentException(message);
             }

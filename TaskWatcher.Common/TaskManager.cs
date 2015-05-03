@@ -45,7 +45,7 @@ namespace TaskWatcher.Common
                                         Name = name,
                                         Priority = priority,
                                         SubTasks = new List<TaskItem>(),
-                                        Tags = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase),
+                                        Tags = new Dictionary<string, DateTime>(StringComparer.InvariantCultureIgnoreCase),
                                         Created = timeStamp,
                                         LastEdited = timeStamp
                                     };

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace TaskWatcher.Common
@@ -17,7 +18,7 @@ namespace TaskWatcher.Common
 
         public static TaskItem AddTag(this TaskManager tm, int index, string tag)
         {
-            return tm.Edit(index, t => t.Tags.Add(tag));
+            return tm.Edit(index, t => t.Tags[tag] = DateTime.Now);
         }
 
         public static TaskItem RemoveTag(this TaskManager tm, int index, string tag)
@@ -43,12 +44,12 @@ namespace TaskWatcher.Common
 
         public static IEnumerable<TaskItem> IncludeByTag(this IEnumerable<TaskItem> tasks, string tag)
         {
-            return tasks.Where(t => t.Tags.Contains(tag));
+            return tasks.Where(t => t.Tags.ContainsKey(tag));
         }
 
         public static IEnumerable<TaskItem> ExcludeByTag(this IEnumerable<TaskItem> tasks, string tag)
         {
-            return tasks.Where(t => !t.Tags.Contains(tag));
+            return tasks.Where(t => !t.Tags.ContainsKey(tag));
         }
     }
 }
