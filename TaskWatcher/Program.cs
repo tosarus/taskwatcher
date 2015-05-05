@@ -16,15 +16,7 @@ namespace TaskWatcher.Console
             processor.AddCommandsObject(new RepositoryCommands(rm));
             processor.AddCommandsObject(processor);
 
-            if (processor.Run(args))
-            {
-                TaskStore.SaveRepositoryManager(rm);
-                if (rm.HasRepository(tm.RepositoryName))
-                {
-                    Repository repository = rm.GetRepository(tm.RepositoryName);
-                    TaskStore.SaveTaskManager(repository, tm);
-                }
-            }
+            processor.Run(args);
         }
     }
 }

@@ -143,5 +143,25 @@ namespace TaskWatcher.Common
                 _tasks[task.Index] = task;
             }
         }
+
+        public void Import(TaskItem newTask)
+        {
+            ImportInternal(new[] { newTask }, null);
+        }
+
+        public void ImportInternal(IEnumerable<TaskItem> tasks, TaskItem parentTask)
+        {
+            foreach (TaskItem newTask in tasks)
+            {
+                TaskItem task = Create(newTask.Name, newTask.Priority);
+                EditInternal(task, t => t.Tags = newTask.Tags);
+                ImportInternal(newTask.SubTasks, task);
+                if (parentTask != null)
+                {
+                    EditInternal(parentTask, t => t.SubTasks.Add(task));
+                    _tasks.Remove(task.Index);
+                }
+            }
+        }
     }
 }

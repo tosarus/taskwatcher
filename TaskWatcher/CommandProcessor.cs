@@ -80,10 +80,16 @@ namespace TaskWatcher.Console
                 {
                     case CommandType.Task:
                         ListNotDoneTasks();
+                        if (_repoManager.HasRepository(_taskManager.RepositoryName))
+                        {
+                            Repository repository = _repoManager.GetRepository(_taskManager.RepositoryName);
+                            TaskStore.SaveTaskManager(repository, _taskManager);
+                        }
                         break;
 
                     case CommandType.Repository:
                         ListRepositories();
+                        TaskStore.SaveRepositoryManager(_repoManager);
                         break;
                 }
                 return true;
@@ -138,7 +144,7 @@ namespace TaskWatcher.Console
             PrintRepositories();
         }
 
-        [Command(CommandType.Repository, "repoconv1", Help = "Converts v1 repository")]
+        [Command(CommandType.CmdProcessor, "repoconv1", Help = "Converts v1 repository")]
         public void ConvertVer1Repository(string repoName)
         {
             Repository repository = _repoManager.GetRepository(repoName);
@@ -151,6 +157,25 @@ namespace TaskWatcher.Console
             importer.ImportFromFileToTaskManager(repository.Path, taskManager);
 
             TaskStore.SaveTaskManager(repository, taskManager);
+
+            _output.WriteLine("Repository '{0}' converted", repository.Name);
+        }
+
+        [Command(CommandType.CmdProcessor, "export", Help = "Exports task to target repository")]
+        public void ExportTask(int taskIndex, string repoName)
+        {
+            TaskItem task = _taskManager.GetByIndex(taskIndex);
+            Repository targetRepo = _repoManager.GetRepository(repoName);
+            if (_taskManager.RepositoryName == targetRepo.Name)
+            {
+                throw new InvalidOperationException("Can't export task to the same repository");
+            }
+
+            TaskManager targetTaskManager = TaskStore.LoadTaskManager(targetRepo);
+            targetTaskManager.Import(task);
+            TaskStore.SaveTaskManager(targetRepo, targetTaskManager);
+
+            _output.WriteLine("Task {0}:'{1}' exported", task.Index, task.Name);
         }
 
         private void PrintTasks(IEnumerable<TaskItem> tasks, Func<IEnumerable<TaskItem>, IEnumerable<TaskItem>> filter)
