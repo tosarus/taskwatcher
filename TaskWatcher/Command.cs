@@ -7,6 +7,7 @@ namespace TaskWatcher.Console
         Repository,
         Task,
         CmdProcessor,
+        State,
         //Queue,
     }
 

@@ -26,12 +26,6 @@ namespace TaskWatcher.Common
             PrintInternal(tasks.AllSorted(), filter, "");
         }
 
-        public void PrintInternal(TaskItem task, Func<IEnumerable<TaskItem>, IEnumerable<TaskItem>> filter, string ident = "")
-        {
-            Output.WriteLine("{0}{1}", ident, ToString(task));
-            PrintInternal(task.SubTasks.AllSorted(), filter, ident + Ident);
-        }
-
         private void PrintInternal(IEnumerable<TaskItem> tasks, Func<IEnumerable<TaskItem>, IEnumerable<TaskItem>> filter, string ident)
         {
             foreach (TaskItem taskItem in filter(tasks))
@@ -40,10 +34,53 @@ namespace TaskWatcher.Common
             }
         }
 
+        public void PrintInternal(TaskItem task, Func<IEnumerable<TaskItem>, IEnumerable<TaskItem>> filter, string ident = "")
+        {
+            Output.WriteLine("{0}{1}", ident, ToString(task));
+            if (task.StatesHistory != null)
+            {
+                StateItem state = task.StatesHistory.OrderByDescending(s => s.TimeStamp).FirstOrDefault();
+                if (state != null)
+                {
+                    Output.WriteLine("{0}    {1}", ident, ToString(state));
+                }
+            }
+            PrintInternal(task.SubTasks.AllSorted(), filter, ident + Ident);
+        }
+
+        public void PrintTaskStateHistory(TaskItem task)
+        {
+            Output.WriteLine(ToString(task));
+            if (task.StatesHistory != null)
+            {
+                foreach (StateItem stateItem in task.StatesHistory.OrderBy(s => s.TimeStamp))
+                {
+                    Output.WriteLine(ToString(stateItem));
+                }
+            }
+        }
+
+        public void PrintTaskTags(TaskItem task)
+        {
+            Output.WriteLine(ToString(task));
+            if (task.Tags != null)
+            {
+                foreach (KeyValuePair<string, DateTime> tag in task.Tags)
+                {
+                    Output.WriteLine("{0} - {1}", tag.Value, tag.Key);
+                }
+            }
+        }
+
         private static string ToString(TaskItem task)
         {
             bool isDone = task.Tags.ContainsKey(TaskTag.Done);
-            return String.Format("<{0}>{1}{2,2} {3}", task.Priority, isDone ? "+" : " ", task.Index, task.Name);
+            return String.Format("<{0}>{1}{2,3} {3}", task.Priority, isDone ? "+" : " ", task.Index, task.Name);
+        }
+
+        private static string ToString(StateItem state)
+        {
+            return String.Format("{0:u}: {1,-10} {2}", state.TimeStamp, state.State, state.Notes);
         }
     }
 }

@@ -24,5 +24,6 @@ namespace TaskWatcher.Common
         public DateTime LastEdited { get; set; }
         public Dictionary<string, DateTime> Tags { get; set; }
         public List<TaskItem> SubTasks { get; set; }
+        public List<StateItem> StatesHistory { get; set; }
     }
 }

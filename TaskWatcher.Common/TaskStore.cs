@@ -77,6 +77,26 @@ namespace TaskWatcher.Common
             SaveToFile(PathHelper.SettingsPath, settings);
         }
 
+        public static StateManager LoadStateManager()
+        {
+            IEnumerable<State> states = null;
+            if (File.Exists(PathHelper.StatesPath))
+            {
+                states = LoadFromFile<IEnumerable<State>>(PathHelper.StatesPath);
+            }
+            return new StateManager(states);
+        }
+
+        public static void SaveStateManager(StateManager stateManager)
+        {
+            if (stateManager == null)
+            {
+                throw new ArgumentNullException("stateManager");
+            }
+
+            SaveToFile(PathHelper.StatesPath, stateManager.States);
+        }
+
         public static TaskManager LoadTaskManager(Repository repository)
         {
             if (repository == null)

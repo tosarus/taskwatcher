@@ -12,21 +12,22 @@ namespace TaskWatcher.Console
     {
         private readonly TaskManager _taskManager;
         private readonly RepositoryManager _repoManager;
+        private readonly StateManager _stateManager;
         private readonly TextWriter _output;
         private readonly List<object> _commandObjects;
         private readonly Dictionary<string, Command> _commands;
         private readonly string _ident;
 
-        public CommandProcessor(TaskManager taskManager, RepositoryManager repoManager)
-            : this(taskManager, repoManager, System.Console.Out)
+        public CommandProcessor(TaskManager taskManager, RepositoryManager repoManager, StateManager stateManager)
+            : this(taskManager, repoManager, stateManager, System.Console.Out)
         {
-            _repoManager = repoManager;
         }
 
-        public CommandProcessor(TaskManager taskManager, RepositoryManager repoManager, TextWriter output)
+        public CommandProcessor(TaskManager taskManager, RepositoryManager repoManager, StateManager stateManager, TextWriter output)
         {
             _taskManager = taskManager;
             _repoManager = repoManager;
+            _stateManager = stateManager;
             _output = output;
             _commandObjects = new List<object>();
             _commands = new Dictionary<string, Command>(StringComparer.InvariantCultureIgnoreCase);
@@ -35,6 +36,11 @@ namespace TaskWatcher.Console
 
         public void AddCommand(Command cmd)
         {
+            if (_commands.ContainsKey(cmd.Name))
+            {
+                string message = String.Format("Command '{0}' is already defined as '{1}'", cmd.Name, cmd.Help);
+                throw new InvalidOperationException(message);
+            }
             _commands[cmd.Name] = cmd;
         }
 
@@ -91,6 +97,11 @@ namespace TaskWatcher.Console
                         ListRepositories();
                         TaskStore.SaveRepositoryManager(_repoManager);
                         break;
+
+                    case CommandType.State:
+                        ListStates();
+                        TaskStore.SaveStateManager(_stateManager);
+                        break;
                 }
                 return true;
             }
@@ -144,6 +155,28 @@ namespace TaskWatcher.Console
             PrintRepositories();
         }
 
+        [Command(CommandType.CmdProcessor, "states", Help = "Lists states")]
+        public void ListStates()
+        {
+            PrintStates();
+        }
+
+        [Command(CommandType.CmdProcessor, "hist", Help = "Lists task state history")]
+        public void ListStateHistory(int taskIndex)
+        {
+            TaskItem task = _taskManager.GetByIndex(taskIndex);
+            var printer = new TaskPrinter(_output, _ident);
+            printer.PrintTaskStateHistory(task);
+        }
+
+        [Command(CommandType.CmdProcessor, "tags", Help = "Lists task tags")]
+        public void ListTags(int taskIndex)
+        {
+            TaskItem task = _taskManager.GetByIndex(taskIndex);
+            var printer = new TaskPrinter(_output, _ident);
+            printer.PrintTaskTags(task);
+        }
+
         [Command(CommandType.CmdProcessor, "repoconv1", Help = "Converts v1 repository")]
         public void ConvertVer1Repository(string repoName)
         {
@@ -195,6 +228,15 @@ namespace TaskWatcher.Console
             _output.WriteLine("Current repository: {0}", _repoManager.CurrentRepository.Name);
         }
 
+        private void PrintStates()
+        {
+            _output.WriteLine("{0} state(s):", _stateManager.States.Count);
+            foreach (State state in _stateManager.States)
+            {
+                _output.WriteLine("{0} -> {1}", state.Name, String.Join(",", state.NextStates));
+            }
+        }
+
         private void PrintCommandUsage(Command command)
         {
             _output.WriteLine("{0} - {1}", command.Name, command.Help);
@@ -203,11 +245,11 @@ namespace TaskWatcher.Console
 
         public void PrintUsage()
         {
-            _output.WriteLine("Usage: tw <cmd> [args], Where cmds:");
+            _output.WriteLine("Usage: tw <cmd> [args], where cmd:");
 
             foreach (Command cmd in _commands.Values.OrderBy(cmd => cmd.Name))
             {
-                _output.WriteLine("{0}{1,-8} - {2}", _ident, cmd.Name, cmd.Help);
+                _output.WriteLine("{0}{1,-12} - {2}", _ident, cmd.Name, cmd.Help);
             }
         }
     }

@@ -11,6 +11,8 @@ namespace TaskWatcher.Common
 
         public static string DefaultRepositoryName { get; set; }
 
+        public static string StatesFileName { get; set; }
+
         public static string ApplicationFolder
         {
             get
@@ -28,11 +30,20 @@ namespace TaskWatcher.Common
             }
         }
 
+        public static string StatesPath
+        {
+            get
+            {
+                return Path.Combine(ApplicationFolder, StatesFileName);
+            }
+        }
+
         static PathHelper()
         {
             ApplicationName = "TaskWatcher";
             SettingsFileName = "config.json";
             DefaultRepositoryName = "default";
+            StatesFileName = "states.json";
         }
 
         public static void InitializeAppFolder()

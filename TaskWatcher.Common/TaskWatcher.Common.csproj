@@ -41,7 +41,10 @@
     <Compile Include="RepositoryManager.cs" />
     <Compile Include="Repository.cs" />
     <Compile Include="PathHelper.cs" />
+    <Compile Include="StateItem.cs" />
+    <Compile Include="StateManager.cs" />
     <Compile Include="TaskPrinter.cs" />
+    <Compile Include="State.cs" />
     <Compile Include="TaskStore.cs" />
     <Compile Include="TaskItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
