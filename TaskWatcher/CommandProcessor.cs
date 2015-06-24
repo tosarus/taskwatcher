@@ -177,6 +177,26 @@ namespace TaskWatcher.Console
             printer.PrintTaskTags(task);
         }
 
+        [Command(CommandType.CmdProcessor, "whatnext", Help = "Lists available next states for task")]
+        public void ListNextStatesHistory(int taskIndex)
+        {
+            TaskItem task = _taskManager.GetByIndex(taskIndex);
+            var states = new List<string>();
+            if (task.StatesHistory == null || task.StatesHistory.Count < 1)
+            {
+                states.Add(_stateManager.OpenState.Name);
+            }
+            else
+            {
+                State st = _stateManager.GetState(task.StatesHistory.OrderByDescending(s => s.TimeStamp).First().State);
+                states.AddRange(st.NextStates);
+            }
+            var printer = new TaskPrinter(_output, _ident);
+            printer.PrintTask(task, e => Enumerable.Empty<TaskItem>());
+            _output.WriteLine();
+            _output.WriteLine("Available next states - {0}", String.Join(", ", states));
+        }
+
         [Command(CommandType.CmdProcessor, "repoconv1", Help = "Converts v1 repository")]
         public void ConvertVer1Repository(string repoName)
         {

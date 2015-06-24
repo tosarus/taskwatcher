@@ -30,7 +30,7 @@ namespace TaskWatcher.Common
             }
         }
 
-        State GetState(string stateName)
+        public State GetState(string stateName)
         {
             if (String.IsNullOrEmpty(stateName))
             {

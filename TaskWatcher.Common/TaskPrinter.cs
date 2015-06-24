@@ -30,11 +30,11 @@ namespace TaskWatcher.Common
         {
             foreach (TaskItem taskItem in filter(tasks))
             {
-                PrintInternal(taskItem, filter, ident);
+                PrintTask(taskItem, filter, ident);
             }
         }
 
-        public void PrintInternal(TaskItem task, Func<IEnumerable<TaskItem>, IEnumerable<TaskItem>> filter, string ident = "")
+        public void PrintTask(TaskItem task, Func<IEnumerable<TaskItem>, IEnumerable<TaskItem>> filter, string ident = "")
         {
             Output.WriteLine("{0}{1}", ident, ToString(task));
             if (task.StatesHistory != null)
