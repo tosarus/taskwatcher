@@ -16,6 +16,12 @@ namespace TaskWatcher.Console
             _manager = manager;
         }
 
+        [Command(CommandType.Repository, "repos", Help = "Lists available repositories")]
+        public void ListRepositories()
+        {
+            // doing nothing here
+        }
+
         [Command(CommandType.Repository, "repoadd", Help = "Creates new repository")]
         public void CreateRepository(string repoName, string repoPath = null)
         {
@@ -38,19 +44,6 @@ namespace TaskWatcher.Console
         public void SetRepositoryPath(string repoName, string repoPath = null)
         {
             _manager.SetRepositoryPath(repoName, repoPath);
-        }
-
-        [Command(CommandType.Repository, "repoimport", Help = "Imports repository of old format")]
-        public void ImportOldRepository(string fromImportPath, string toRepoName, string toRepoPath = null)
-        {
-            Repository repository = _manager.GetOrCreateRepository(toRepoName, toRepoPath);
-            TaskManager taskManager = TaskStore.LoadTaskManager(repository);
-
-            var importerFactory = new ImporterFactory();
-            IImporter importer = importerFactory.CreateOldInfraImporter();
-            importer.ImportFromFileToTaskManager(fromImportPath, taskManager);
-
-            TaskStore.SaveTaskManager(repository, taskManager);
         }
     }
 }

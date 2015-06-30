@@ -36,18 +36,6 @@ namespace TaskWatcher.Console
             _manager.AttachTo(task.Index, toIndex);
         }
 
-        [Command(CommandType.Task, "addtop", Help = "Creates task with top priority")]
-        public void CreateTopTask(string name)
-        {
-            _manager.Create(name, TaskPriority.Top);
-        }
-
-        [Command(CommandType.Task, "addlast", Help = "Creates task with last priority")]
-        public void CreateLastTask(string name)
-        {
-            _manager.Create(name, TaskPriority.Last);
-        }
-
         [Command(CommandType.Task, "detach", Help = "Detaches task")]
         public void DetachTask(int taskIndex)
         {

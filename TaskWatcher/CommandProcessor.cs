@@ -75,7 +75,6 @@ namespace TaskWatcher.Console
             if (!_commands.TryGetValue(args[0], out command))
             {
                 _output.WriteLine("Unknown command '{0}'", args[0]);
-                PrintUsage();
                 return false;
             }
 
@@ -94,7 +93,7 @@ namespace TaskWatcher.Console
                         break;
 
                     case CommandType.Repository:
-                        ListRepositories();
+                        PrintRepositories();
                         TaskStore.SaveRepositoryManager(_repoManager);
                         break;
 
@@ -107,13 +106,13 @@ namespace TaskWatcher.Console
             }
             catch (Exception ex)
             {
-                _output.WriteLine("Error executing '{0}':", command.Name);
-                _output.WriteLine("{0}{1}", _ident, ex.Message);
+                _output.WriteLine("Error: {0}", ex.Message);
+                _output.WriteLine("Usage: <tw> {1} {2}", _ident, command.Name, command.UsageArgs);
                 return false;
             }
         }
 
-        [Command(CommandType.CmdProcessor, "help", Help = "Prints command usage or list of all commands")]
+        [Command(CommandType.Other, "help", Help = "Prints command usage or list of all commands")]
         public void CmdHelp(string cmd = null)
         {
             if (!String.IsNullOrEmpty(cmd))
@@ -122,14 +121,19 @@ namespace TaskWatcher.Console
                 if (_commands.TryGetValue(cmd, out command))
                 {
                     PrintCommandUsage(command);
-                    return;
                 }
-                _output.WriteLine("Unknown command '{0}'", cmd);
+                else
+                {
+                    _output.WriteLine("Unknown command '{0}'", cmd);
+                }
             }
-            PrintUsage();
+            else
+            {
+                PrintUsage();
+            }
         }
 
-        [Command(CommandType.CmdProcessor, "list", Help = "Lists a task, or all not done tasks")]
+        [Command(CommandType.Other, "list", Help = "Lists a task, or all not done tasks")]
         public void ListNotDoneTasks(int taskIndex = 0)
         {
             if (taskIndex > 0)
@@ -143,25 +147,19 @@ namespace TaskWatcher.Console
             }
         }
 
-        [Command(CommandType.CmdProcessor, "listall", Help = "Lists all tasks")]
+        [Command(CommandType.Other, "listall", Help = "Lists all tasks")]
         public void ListAllTasks()
         {
             PrintTasks(_taskManager.Tasks, e => e);
         }
 
-        [Command(CommandType.CmdProcessor, "repos", Help = "Lists available repositories")]
-        public void ListRepositories()
-        {
-            PrintRepositories();
-        }
-
-        [Command(CommandType.CmdProcessor, "states", Help = "Lists states")]
+        [Command(CommandType.Other, "states", Help = "Lists states")]
         public void ListStates()
         {
             PrintStates();
         }
 
-        [Command(CommandType.CmdProcessor, "hist", Help = "Lists task state history")]
+        [Command(CommandType.Other, "hist", Help = "Lists task state history")]
         public void ListStateHistory(int taskIndex)
         {
             TaskItem task = _taskManager.GetByIndex(taskIndex);
@@ -169,7 +167,7 @@ namespace TaskWatcher.Console
             printer.PrintTaskStateHistory(task);
         }
 
-        [Command(CommandType.CmdProcessor, "tags", Help = "Lists task tags")]
+        [Command(CommandType.Other, "tags", Help = "Lists task tags")]
         public void ListTags(int taskIndex)
         {
             TaskItem task = _taskManager.GetByIndex(taskIndex);
@@ -177,7 +175,7 @@ namespace TaskWatcher.Console
             printer.PrintTaskTags(task);
         }
 
-        [Command(CommandType.CmdProcessor, "whatnext", Help = "Lists available next states for task")]
+        [Command(CommandType.Other, "whatnext", Help = "Lists available next states for task")]
         public void ListNextStatesHistory(int taskIndex)
         {
             TaskItem task = _taskManager.GetByIndex(taskIndex);
@@ -197,7 +195,7 @@ namespace TaskWatcher.Console
             _output.WriteLine("Available next states - {0}", String.Join(", ", states));
         }
 
-        [Command(CommandType.CmdProcessor, "repoconv1", Help = "Converts v1 repository")]
+        [Command(CommandType.Other, "repoconv1", Help = "Converts v1 repository")]
         public void ConvertVer1Repository(string repoName)
         {
             Repository repository = _repoManager.GetRepository(repoName);
@@ -214,7 +212,20 @@ namespace TaskWatcher.Console
             _output.WriteLine("Repository '{0}' converted", repository.Name);
         }
 
-        [Command(CommandType.CmdProcessor, "export", Help = "Exports task to target repository")]
+        [Command(CommandType.Other, "repoimport", Help = "Imports repository of old format")]
+        public void ImportOldRepository(string fromImportPath, string toRepoName, string toRepoPath = null)
+        {
+            Repository repository = _repoManager.GetOrCreateRepository(toRepoName, toRepoPath);
+            TaskManager taskManager = TaskStore.LoadTaskManager(repository);
+
+            var importerFactory = new ImporterFactory();
+            IImporter importer = importerFactory.CreateOldInfraImporter();
+            importer.ImportFromFileToTaskManager(fromImportPath, taskManager);
+
+            TaskStore.SaveTaskManager(repository, taskManager);
+        }
+
+        [Command(CommandType.Other, "export", Help = "Exports task to target repository")]
         public void ExportTask(int taskIndex, string repoName)
         {
             TaskItem task = _taskManager.GetByIndex(taskIndex);
@@ -267,9 +278,14 @@ namespace TaskWatcher.Console
         {
             _output.WriteLine("Usage: tw <cmd> [args], where cmd:");
 
-            foreach (Command cmd in _commands.Values.OrderBy(cmd => cmd.Name))
+            foreach (var cmdGroup in _commands.Values.GroupBy(cmd => cmd.Type))
             {
-                _output.WriteLine("{0}{1,-12} - {2}", _ident, cmd.Name, cmd.Help);
+                _output.WriteLine("{0} commands", cmdGroup.Key);
+                foreach (Command cmd in cmdGroup.OrderBy(cmd => cmd.Name))
+                {
+                    _output.WriteLine("{0}{1,-12} - {2}", _ident, cmd.Name, cmd.Help);
+                }
+                _output.WriteLine();
             }
         }
     }
