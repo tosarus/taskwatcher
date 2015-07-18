@@ -12,7 +12,7 @@ namespace TaskWatcher.Common
         internal RepositoryManager(RepositoryContainer settings)
             : this(settings.Repositories)
         {
-            if (_repositories.ContainsKey(settings.CurrentRepository))
+            if (!String.IsNullOrEmpty(settings.CurrentRepository) && _repositories.ContainsKey(settings.CurrentRepository))
             {
                 CurrentRepository = _repositories[settings.CurrentRepository];
             }
